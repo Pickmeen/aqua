@@ -11,13 +11,16 @@ require_once __DIR__ . '/icons.php';
 $page_title = $page_title ?? get_content('site_name', 'Plongée Carpentras');
 $page_description = $page_description ?? 'Club Subaquatique du Comtat Venaissin — plongée sous-marine à Carpentras : formations, baptêmes, sorties et calendrier du club.';
 $current_page = basename($_SERVER['SCRIPT_NAME']);
+$canonical_path = $current_page === 'index.php' ? '' : $current_page;
+$site_base_url = 'https://www.plongeecarpentras.fr/';
 
 $nav_items = [
-    'index.php'       => 'Accueil',
-    'calendrier.php'   => 'Calendrier',
-    'formations.php'   => 'Formations',
-    'inscription.php'  => 'Inscriptions & tarifs',
-    'contact.php'      => 'Contact',
+    'index.php'            => 'Accueil',
+    'index.php#formations' => 'Formations',
+    'index.php#tarifs'     => 'Tarifs',
+    'calendrier.php'       => 'Calendrier',
+    'inscription.php'      => 'Inscription',
+    'index.php#contact'    => 'Contact',
 ];
 ?><!DOCTYPE html>
 <html lang="fr">
@@ -26,9 +29,42 @@ $nav_items = [
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= e($page_title) ?></title>
 <meta name="description" content="<?= e($page_description) ?>">
+<link rel="canonical" href="<?= e($site_base_url . $canonical_path) ?>">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="<?= e(get_content('site_name', 'Plongée Carpentras')) ?>">
+<meta property="og:title" content="<?= e($page_title) ?>">
+<meta property="og:description" content="<?= e($page_description) ?>">
+<meta property="og:url" content="<?= e($site_base_url . $canonical_path) ?>">
+<meta name="twitter:card" content="summary">
+<?php if ($current_page === 'index.php'): ?>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SportsActivityLocation",
+  "name": "<?= e(get_content('association_name')) ?>",
+  "alternateName": "<?= e(get_content('site_name')) ?>",
+  "url": "<?= e($site_base_url) ?>",
+  "sport": "Plongée sous-marine",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "<?= e(get_content('contact_address')) ?>",
+    "addressLocality": "Carpentras",
+    "addressRegion": "Vaucluse",
+    "addressCountry": "FR"
+  },
+  "email": "<?= e(get_content('contact_email')) ?>",
+  "sameAs": ["<?= e(get_content('facebook_url')) ?>"],
+  "memberOf": {
+    "@type": "Organization",
+    "name": "FFESSM"
+  }
+}
+</script>
+<?php endif; ?>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><text y=%2220%22 font-size=%2220%22>🤿</text></svg>">
 <!-- Google tag (gtag.js) -->
@@ -59,7 +95,7 @@ gtag('config', 'G-YSK54J1WP0');
         <ul class="nav-links" id="nav-links">
             <?php foreach ($nav_items as $href => $label): ?>
             <li>
-                <a href="<?= e($href) ?>" class="<?= $current_page === $href ? 'active' : '' ?>">
+                <a href="<?= e($href) ?>" class="<?= (strpos($href, '#') === false && $current_page === $href) ? 'active' : '' ?>">
                     <?= e($label) ?>
                 </a>
             </li>

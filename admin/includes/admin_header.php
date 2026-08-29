@@ -17,6 +17,7 @@ $nav = [
     'events'     => ['label' => 'Calendrier',       'href' => 'events.php', 'icon' => 'clock'],
     'formations' => ['label' => 'Formations',        'href' => 'formations.php', 'icon' => 'fin'],
     'pricing'    => ['label' => 'Tarifs',            'href' => 'pricing.php', 'icon' => 'medal'],
+    'documents'  => ['label' => 'Documents (PDF)',  'href' => 'documents.php', 'icon' => 'arrow-down'],
     'content'    => ['label' => 'Contenu du site',   'href' => 'content.php', 'icon' => 'edit'],
     'account'    => ['label' => 'Mon compte',        'href' => 'account.php', 'icon' => 'bubbles'],
 ];
@@ -27,7 +28,7 @@ $nav = [
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= e($page_title) ?> — Administration Plongée Carpentras</title>
 <meta name="robots" content="noindex, nofollow">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
 <link rel="stylesheet" href="../assets/css/admin.css">
 </head>

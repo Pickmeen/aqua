@@ -26,11 +26,8 @@
             <h3>Informations</h3>
             <p><a href="#" id="mentions-legales-link">Mentions légales</a></p>
         </div>
-
-        <div class="footer-section">
-            <p class="footer-copy"><?= e(get_content('footer_text')) ?></p>
-        </div>
     </div>
+    <p class="footer-copy"><?= e(get_content('footer_text')) ?></p>
 </footer>
 
 <button id="back-to-top" class="back-to-top" aria-label="Remonter en haut de page">
@@ -46,6 +43,9 @@
     </div>
 </div>
 
-<script src="assets/js/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js" defer></script>
+<script src="assets/js/main.js" defer></script>
 </body>
 </html>

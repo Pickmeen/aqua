@@ -6,6 +6,7 @@ require_once __DIR__ . '/includes/admin_header.php';
 $nbUpcoming = (int) get_pdo()->query('SELECT COUNT(*) AS c FROM events WHERE event_date >= CURDATE()')->fetch()['c'];
 $nbFormations = (int) get_pdo()->query('SELECT COUNT(*) AS c FROM formations')->fetch()['c'];
 $nbPricing = (int) get_pdo()->query('SELECT COUNT(*) AS c FROM pricing')->fetch()['c'];
+$nbDocsMissing = (int) get_pdo()->query('SELECT COUNT(*) AS c FROM documents WHERE filename IS NULL')->fetch()['c'];
 ?>
 
 <p style="color:var(--ink-500); margin-bottom:1.8rem;">
@@ -27,6 +28,11 @@ $nbPricing = (int) get_pdo()->query('SELECT COUNT(*) AS c FROM pricing')->fetch(
         <strong><?= $nbPricing ?></strong>
         <span>Ligne(s) tarifaires</span>
         <a href="pricing.php">Gérer les tarifs →</a>
+    </div>
+    <div class="admin-stat-card">
+        <strong><?= $nbDocsMissing ?></strong>
+        <span>Document(s) PDF manquant(s)</span>
+        <a href="documents.php">Gérer les documents →</a>
     </div>
 </div>
 

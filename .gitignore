@@ -1,0 +1,4 @@
+# Documents uploadés depuis le backoffice : contenu runtime, pas versionné
+uploads/documents/*
+!uploads/documents/.htaccess
+!uploads/documents/.gitkeep

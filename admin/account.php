@@ -1,7 +1,6 @@
 <?php
-$page_title = 'Mon compte';
-$active_nav = 'account';
-require_once __DIR__ . '/includes/admin_header.php';
+require_once __DIR__ . '/includes/auth.php';
+require_login();
 
 $stmt = get_pdo()->prepare('SELECT id, username, password_hash FROM admin_users WHERE id = ?');
 $stmt->execute([$_SESSION['admin_id']]);
@@ -44,6 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
+
+$page_title = 'Mon compte';
+$active_nav = 'account';
+require_once __DIR__ . '/includes/admin_header.php';
 ?>
 
 <form class="admin-form" method="post" novalidate>

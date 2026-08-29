@@ -1,127 +1,185 @@
 <?php
 require_once __DIR__ . '/includes/functions.php';
-$page_title = get_content('site_name', 'Plongée Carpentras') . ' — Club de plongée sous-marine à Carpentras';
+$page_title = get_content('seo_title', get_content('site_name', 'Plongée Carpentras'));
+$page_description = get_content('seo_description');
 require_once __DIR__ . '/includes/header.php';
 
-$next_event = get_next_event();
-$formations_preview = array_slice(get_formations(), 0, 4);
+$formations = get_formations();
+$pricing = get_pricing();
+$documents = get_documents();
 ?>
 
-<!-- HERO -->
-<section class="hero">
-    <div class="hero-ocean" aria-hidden="true">
-        <div class="ray ray-1"></div>
-        <div class="ray ray-2"></div>
-        <div class="ray ray-3"></div>
-        <span class="bubble b1"></span>
-        <span class="bubble b2"></span>
-        <span class="bubble b3"></span>
-        <span class="bubble b4"></span>
-        <span class="bubble b5"></span>
-        <span class="bubble b6"></span>
+<div class="ocean-backdrop" aria-hidden="true">
+    <span class="ray ray-1"></span>
+    <span class="ray ray-2"></span>
+</div>
+<div class="depth-rail" aria-hidden="true">
+    <div class="depth-rail-ticks"><span>0 m</span><span>20 m</span><span>60 m</span></div>
+    <div class="depth-rail-track">
+        <div class="depth-rail-fill"></div>
+        <div class="depth-rail-dot"></div>
     </div>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="hero">
     <div class="hero-content">
-        <p class="eyebrow">Carpentras &middot; Vaucluse</p>
+        <p class="eyebrow">Carpentras &middot; Vaucluse &middot; FFESSM</p>
         <h1><?= e(get_content('hero_title')) ?></h1>
         <p class="hero-subtitle"><?= e(get_content('hero_subtitle')) ?></p>
         <div class="hero-actions">
-            <a href="<?= e(get_content('facebook_url')) ?>" target="_blank" rel="noopener" class="btn btn-primary">
-                <?php render_icon('facebook', 'icon'); ?>
-                <?= e(get_content('hero_cta_text')) ?>
+            <a href="#formations" class="btn btn-primary">
+                <?php render_icon('first-dive', 'icon'); ?>
+                <?= e(get_content('hero_cta_baptism', 'Baptême de plongée')) ?>
             </a>
-            <a href="formations.php" class="btn btn-ghost">Découvrir nos formations</a>
+            <a href="inscription.php" class="btn btn-ghost">
+                <?= e(get_content('hero_cta_join', 'Nous rejoindre')) ?>
+            </a>
         </div>
     </div>
-    <div class="hero-wave" aria-hidden="true">
-        <svg viewBox="0 0 1200 80" preserveAspectRatio="none"><path d="M0,40 C200,80 400,0 600,40 C800,80 1000,0 1200,40 L1200,80 L0,80 Z"></path></svg>
+    <div class="hero-scroll-cue">
+        <span>Découvrir</span>
+        <?php render_icon('arrow-down', 'icon'); ?>
     </div>
 </section>
 
-<!-- ATOUTS -->
-<section class="section values" data-reveal>
+<!-- LE CLUB EN 3 CHIFFRES -->
+<section class="section section-tight" id="club">
     <div class="container">
-        <h2 class="section-title">La plongée, en toute confiance</h2>
-        <p class="section-lead">Un club associatif à taille humaine, des encadrants diplômés et des séances en piscine comme en mer, ouvertes à tous les âges.</p>
-
-        <div class="value-grid">
-            <div class="value-card">
-                <?php render_icon('medal', 'icon icon-lg'); ?>
-                <h3>Encadrement qualifié</h3>
-                <p>Des moniteurs et initiateurs diplômés FFESSM vous accompagnent à chaque étape, du baptême aux niveaux les plus avancés.</p>
+        <h2 class="section-title" data-reveal>Le club en 3 chiffres</h2>
+        <div class="stats-grid">
+            <div class="stat-card" data-reveal>
+                <div class="stat-value"><?= e(get_content('stat_1_value')) ?></div>
+                <div class="stat-label"><?= e(get_content('stat_1_label')) ?></div>
             </div>
-            <div class="value-card">
-                <?php render_icon('fin', 'icon icon-lg'); ?>
-                <h3>De la piscine à la mer</h3>
-                <p>Entraînements réguliers à la piscine municipale et sorties encadrées en mer pour progresser en toute sécurité.</p>
+            <div class="stat-card" data-reveal>
+                <div class="stat-value"><?= e(get_content('stat_2_value')) ?></div>
+                <div class="stat-label"><?= e(get_content('stat_2_label')) ?></div>
             </div>
-            <div class="value-card">
-                <?php render_icon('child', 'icon icon-lg'); ?>
-                <h3>Pour tous les âges</h3>
-                <p>Des sections dédiées aux enfants dès 10 ans, aux ados et aux adultes, jusqu'aux formations d'encadrement.</p>
-            </div>
-            <div class="value-card">
-                <?php render_icon('bubbles', 'icon icon-lg'); ?>
-                <h3>Esprit club</h3>
-                <p>Une association conviviale où l'on partage la passion du monde sous-marin, en dehors de toute compétition.</p>
+            <div class="stat-card" data-reveal>
+                <div class="stat-value"><?= e(get_content('stat_3_value')) ?></div>
+                <div class="stat-label"><?= e(get_content('stat_3_label')) ?></div>
             </div>
         </div>
+        <p class="club-intro" data-reveal><?= e(get_content('club_intro')) ?></p>
     </div>
 </section>
 
-<!-- PROCHAIN EVENEMENT -->
-<?php if ($next_event): ?>
-<section class="section next-event" data-reveal>
-    <div class="container next-event-inner">
-        <div class="next-event-icon"><?php render_icon('clock', 'icon icon-lg'); ?></div>
-        <div class="next-event-text">
-            <p class="eyebrow">Prochain rendez-vous</p>
-            <h2><?= e($next_event['title']) ?></h2>
-            <p class="next-event-date">
-                <?= e(format_event_date($next_event['event_date'])) ?><?= $next_event['event_time'] ? ' &middot; ' . e(substr($next_event['event_time'], 0, 5)) : '' ?>
-            </p>
-            <?php if (!empty($next_event['description'])): ?>
-                <p><?= e($next_event['description']) ?></p>
-            <?php endif; ?>
-        </div>
-        <a href="calendrier.php" class="btn btn-primary">Voir le calendrier</a>
-    </div>
-</section>
-<?php endif; ?>
-
-<!-- APERCU FORMATIONS -->
-<section class="section formations-preview" data-reveal>
+<!-- FORMATIONS -->
+<section class="section" id="formations">
     <div class="container">
-        <h2 class="section-title">Nos formations</h2>
-        <p class="section-lead">Du baptême de plongée jusqu'au niveau 4, en passant par les brevets d'encadrement.</p>
+        <h2 class="section-title" data-reveal>Nos formations</h2>
+        <p class="section-lead on-dark" data-reveal>Du baptême aux brevets d'encadrement, classées par profondeur croissante. Cliquez une carte pour le détail.</p>
 
         <div class="grid grid-4">
-            <?php foreach ($formations_preview as $formation): ?>
-            <div class="card">
-                <div class="card-icon"><?php render_icon($formation['icon'], 'icon icon-lg'); ?></div>
+            <?php foreach ($formations as $formation): ?>
+            <div class="formation-card"
+                 role="button" tabindex="0"
+                 data-reveal
+                 data-title="<?= e($formation['title']) ?>"
+                 data-depth="<?= e($formation['depth_label']) ?>"
+                 data-details="<?= e($formation['details']) ?>">
+                <div class="formation-card-top">
+                    <div class="formation-icon"><?php render_icon($formation['icon'], 'icon'); ?></div>
+                    <span class="depth-badge"><?= e($formation['depth_label']) ?></span>
+                </div>
                 <h3><?= e($formation['title']) ?></h3>
                 <p><?= e($formation['summary']) ?></p>
+                <span class="card-cta">Voir le détail <?php render_icon('chevron-right', 'icon'); ?></span>
             </div>
             <?php endforeach; ?>
         </div>
+    </div>
+</section>
 
-        <div class="center-cta">
-            <a href="formations.php" class="btn btn-outline">Voir toutes les formations</a>
+<!-- TARIFS -->
+<section class="section" id="tarifs">
+    <div class="container">
+        <h2 class="section-title" data-reveal>Inscriptions &amp; tarifs</h2>
+        <p class="section-lead on-dark" data-reveal>Adhésion annuelle, licence FFESSM et formation associées selon votre profil.</p>
+
+        <div class="price-table-wrap" data-reveal>
+            <table class="price-table">
+                <thead>
+                    <tr>
+                        <th>Adhésion</th>
+                        <th>Licence + cotisations + formation</th>
+                        <th>Prix total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($pricing as $row): ?>
+                    <tr>
+                        <td data-label="Adhésion"><?= e($row['label']) ?></td>
+                        <td data-label="Détail"><?= e($row['detail']) ?></td>
+                        <td data-label="Prix total" class="total-price"><?= e($row['price']) ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        <p class="note" data-reveal><?= e(get_content('pricing_note')) ?></p>
+
+        <div class="center-cta" data-reveal>
+            <a href="inscription.php" class="btn btn-primary">Voir les étapes d'inscription</a>
         </div>
     </div>
 </section>
 
-<!-- CTA FINALE -->
-<section class="section cta-band" data-reveal>
-    <div class="container cta-band-inner">
-        <div>
-            <h2>Envie de nous rejoindre&nbsp;?</h2>
-            <p>Contactez-nous ou passez directement nous voir à la piscine municipale de Carpentras.</p>
-        </div>
-        <div class="hero-actions">
-            <a href="contact.php" class="btn btn-primary">Nous contacter</a>
-            <a href="inscription.php" class="btn btn-ghost">Tarifs &amp; inscriptions</a>
+<!-- CONTACT -->
+<section class="section" id="contact">
+    <div class="container">
+        <h2 class="section-title" data-reveal>Contactez-nous</h2>
+        <p class="section-lead on-dark" data-reveal>Le club vous accueille à la piscine municipale de Carpentras, sur les créneaux d'entraînement.</p>
+
+        <div class="contact-layout">
+            <div class="contact-info">
+                <div class="contact-item" data-reveal>
+                    <?php render_icon('pin', 'icon icon-lg'); ?>
+                    <div>
+                        <h3>Adresse</h3>
+                        <span><?= e(get_content('contact_address')) ?></span>
+                    </div>
+                </div>
+                <div class="contact-item" data-reveal>
+                    <?php render_icon('mail', 'icon icon-lg'); ?>
+                    <div>
+                        <h3>Email</h3>
+                        <span><a href="mailto:<?= e(get_content('contact_email')) ?>"><?= e(get_content('contact_email')) ?></a></span>
+                    </div>
+                </div>
+                <div class="contact-item" data-reveal>
+                    <?php render_icon('facebook', 'icon icon-lg'); ?>
+                    <div>
+                        <h3>Facebook</h3>
+                        <span><a href="<?= e(get_content('facebook_url')) ?>" target="_blank" rel="noopener">Plongée Carpentras</a></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-map-card" data-reveal>
+                <?php render_icon('compass', 'icon icon-xl'); ?>
+                <h3>Nous trouver</h3>
+                <p><?= e(get_content('contact_address')) ?></p>
+                <a class="btn btn-outline"
+                   href="https://www.google.com/maps/search/?api=1&query=<?= urlencode(get_content('contact_address')) ?>"
+                   target="_blank" rel="noopener">
+                    Ouvrir dans Google Maps
+                </a>
+            </div>
         </div>
     </div>
 </section>
+
+<!-- OVERLAY + PANNEAU DÉTAIL FORMATION -->
+<div class="panel-overlay"></div>
+<aside class="formation-panel" aria-hidden="true">
+    <button class="close-panel" aria-label="Fermer">&times;</button>
+    <div class="formation-icon"></div>
+    <h2 id="panel-title"></h2>
+    <span class="depth-badge" id="panel-depth"></span>
+    <p id="panel-description"></p>
+    <a href="#contact" class="btn btn-primary">Nous contacter pour cette formation</a>
+</aside>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>

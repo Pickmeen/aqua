@@ -45,7 +45,7 @@ $hasAdmin = (int) get_pdo()->query('SELECT COUNT(*) AS c FROM admin_users')->fet
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Connexion administration — Plongée Carpentras</title>
 <meta name="robots" content="noindex, nofollow">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../assets/css/style.css">
 <link rel="stylesheet" href="../assets/css/admin.css">
 </head>

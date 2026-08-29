@@ -1,7 +1,6 @@
 <?php
-$page_title = 'Ligne tarifaire';
-$active_nav = 'pricing';
-require_once __DIR__ . '/includes/admin_header.php';
+require_once __DIR__ . '/includes/auth.php';
+require_login();
 
 $id = isset($_GET['id']) ? (int) $_GET['id'] : (isset($_POST['id']) ? (int) $_POST['id'] : 0);
 $pricing = ['label' => '', 'detail' => '', 'price' => '', 'sort_order' => 0];
@@ -48,9 +47,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
+
+$page_title = 'Ligne tarifaire';
+$active_nav = 'pricing';
+require_once __DIR__ . '/includes/admin_header.php';
 ?>
 
-<a href="pricing.php" style="color:var(--teal-500); font-weight:700; font-size:.88rem; display:inline-block; margin-bottom:1.2rem;">&larr; Retour aux tarifs</a>
+<a href="pricing.php" style="color:var(--depth-mid); font-weight:700; font-size:.88rem; display:inline-block; margin-bottom:1.2rem;">&larr; Retour aux tarifs</a>
 
 <form class="admin-form" method="post" novalidate>
     <?= csrf_field() ?>

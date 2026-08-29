@@ -1,0 +1,8 @@
+# Ce dossier ne doit servir que des PDF : on désactive toute exécution
+# de script, même si un fichier malveillant y était déposé par erreur.
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<FilesMatch "\.(php|phtml|php\d?|pl|py|cgi|sh)$">
+    Require all denied
+</FilesMatch>

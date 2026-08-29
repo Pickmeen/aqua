@@ -46,11 +46,11 @@ function get_next_event(): ?array
     return $events[0] ?? null;
 }
 
-/** Formations proposées par le club, dans l'ordre défini par l'admin. */
+/** Formations proposées par le club, dans l'ordre défini par l'admin (profondeur croissante). */
 function get_formations(): array
 {
     return get_pdo()
-        ->query('SELECT id, title, summary, details, icon FROM formations ORDER BY sort_order ASC, id ASC')
+        ->query('SELECT id, title, summary, details, icon, depth_label FROM formations ORDER BY sort_order ASC, id ASC')
         ->fetchAll();
 }
 
@@ -60,6 +60,20 @@ function get_pricing(): array
     return get_pdo()
         ->query('SELECT id, label, detail, price FROM pricing ORDER BY sort_order ASC, id ASC')
         ->fetchAll();
+}
+
+/** Documents téléchargeables (fiche d'adhésion, CACI...), indexés par doc_key. */
+function get_documents(): array
+{
+    $rows = get_pdo()
+        ->query('SELECT doc_key, title, description, filename, original_name FROM documents ORDER BY sort_order ASC, id ASC')
+        ->fetchAll();
+
+    $byKey = [];
+    foreach ($rows as $row) {
+        $byKey[$row['doc_key']] = $row;
+    }
+    return $byKey;
 }
 
 /** Formate une date SQL (YYYY-MM-DD) en français, ex. "samedi 14 mars 2026". */
