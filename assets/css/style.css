@@ -5,7 +5,8 @@
 
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; overflow-x: hidden; }
+body { overflow-x: hidden; }
 body, h1, h2, h3, h4, p, ul, table, figure { margin: 0; padding: 0; }
 ul { list-style: none; }
 img { max-width: 100%; display: block; }
@@ -266,10 +267,13 @@ h3 { font-size: 1.15rem; }
 .contact-map-card .icon-xl { color: var(--teal-400); margin-bottom: .4rem; }
 .contact-map-card h3 { color: var(--white); }
 .contact-map-card p { color: rgba(255,255,255,.8); margin-bottom: 1rem; }
+.contact-map-card .btn-outline { color: var(--white); border-color: rgba(255,255,255,.6); }
+.contact-map-card .btn-outline:hover { background: var(--white); color: var(--ocean-800); }
 
 /* ---------- Footer ---------- */
 .site-footer { position: relative; background: var(--ocean-950); color: rgba(255,255,255,.75); padding-top: 3.5rem; }
-.footer-content { width: min(1160px, 92%); margin-inline: auto; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 2.4rem; padding-bottom: 2.4rem; border-bottom: 1px solid rgba(255,255,255,.1); }
+.footer-wave { z-index: 0; pointer-events: none; }
+.footer-content { position: relative; z-index: 1; width: min(1160px, 92%); margin-inline: auto; display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 2.4rem; padding-bottom: 2.4rem; border-bottom: 1px solid rgba(255,255,255,.1); }
 .footer-brand { color: var(--white); margin-bottom: .8rem; }
 .footer-section h3 { color: var(--white); font-size: .95rem; margin-bottom: .8rem; }
 .footer-section a:hover { color: var(--teal-400); }
