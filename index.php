@@ -2,6 +2,7 @@
 require_once __DIR__ . '/includes/functions.php';
 $page_title = get_content('seo_title', get_content('site_name', 'Plongée Carpentras'));
 $page_description = get_content('seo_description');
+$load_three = true;
 require_once __DIR__ . '/includes/header.php';
 
 $formations = get_formations();
@@ -23,6 +24,7 @@ $documents = get_documents();
 
 <!-- HERO -->
 <section class="hero" id="hero">
+    <canvas id="hero-3d" class="hero-3d-canvas" aria-hidden="true"></canvas>
     <div class="hero-content">
         <p class="eyebrow">Carpentras &middot; Vaucluse &middot; FFESSM</p>
         <h1><?= e(get_content('hero_title')) ?></h1>
@@ -80,7 +82,10 @@ $documents = get_documents();
                  data-depth="<?= e($formation['depth_label']) ?>"
                  data-details="<?= e($formation['details']) ?>">
                 <div class="formation-card-top">
-                    <div class="formation-icon"><?php render_icon($formation['icon'], 'icon'); ?></div>
+                    <div class="formation-icon">
+                        <?php render_icon($formation['icon'], 'icon'); ?>
+                        <canvas class="formation-icon-3d" aria-hidden="true"></canvas>
+                    </div>
                     <span class="depth-badge"><?= e($formation['depth_label']) ?></span>
                 </div>
                 <h3><?= e($formation['title']) ?></h3>

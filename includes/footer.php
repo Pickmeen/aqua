@@ -47,5 +47,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1/dist/lenis.min.js" defer></script>
 <script src="assets/js/main.js" defer></script>
+<?php if (!empty($load_three)): ?>
+<script type="module" src="assets/js/three-effects.js"></script>
+<?php endif; ?>
 </body>
 </html>
