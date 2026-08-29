@@ -1,14 +1,21 @@
 # Plongée Carpentras — CSCV
 
-Site du Club Subaquatique du Comtat Venaissin : 5 pages publiques (accueil,
-calendrier, formations, inscriptions & tarifs, contact) entièrement
-dynamiques, plus un backoffice pour tout gérer sans toucher au code
-(calendrier, formations, tarifs, textes du site).
+Site vitrine du Club Subaquatique du Comtat Venaissin : une page unique
+(hero, le club en 3 chiffres, formations, tarifs, contact) + 2 sous-pages
+(calendrier, inscription), pensé mobile d'abord pour les visiteurs qui
+arrivent depuis Facebook. Direction artistique « descente en profondeur » :
+le fond s'assombrit progressivement au scroll (bleu profond → turquoise),
+avec un indicateur de profondeur discret (0 m / 20 m / 60 m) corrélé aux
+niveaux de formation. Un backoffice permet de tout gérer sans toucher au
+code (calendrier, formations, tarifs, documents PDF, textes du site).
 
-Stack : **PHP + MySQL**, sans framework ni étape de build — compatible avec
-n'importe quel hébergement mutualisé, y compris le forfait le plus basique
-d'OVH (PHP + 1 base MySQL sont inclus d'office, aucune option payante
-nécessaire).
+Stack : **PHP + MySQL** côté serveur (sans framework ni étape de build —
+compatible avec n'importe quel hébergement mutualisé, y compris le forfait
+le plus basique d'OVH), **GSAP + ScrollTrigger + Lenis** en CDN côté client
+pour les animations (apparitions en stagger réversibles, parallaxe légère,
+smooth scroll). Si ces CDN ne chargent pas (bloqueur de script, hors ligne),
+le site se dégrade proprement : scroll natif et apparitions via
+IntersectionObserver, contenu toujours visible même sans JavaScript.
 
 ## Structure du projet
 
@@ -16,9 +23,12 @@ nécessaire).
 config/db.php        Connexion à la base (identifiants à renseigner)
 database/schema.sql   Tables + contenu initial à importer
 includes/             Fonctions PHP, header/footer, icônes SVG partagées
-assets/css, assets/js Styles et scripts du site public
-index.php, calendrier.php, formations.php,
-inscription.php, contact.php             Pages publiques
+assets/css/style.css  Design system (palette profondeur, typo, animations)
+assets/js/main.js     Nav, popups, calendrier, Lenis/GSAP, indicateur de profondeur
+uploads/documents/    PDF uploadés depuis le backoffice (non versionnés)
+index.php              Page unique : hero, chiffres, formations, tarifs, contact
+calendrier.php, inscription.php    Sous-pages
+formations.php, contact.php        Redirections 301 vers les ancres de index.php
 admin/                Backoffice (protégé par mot de passe)
 ```
 
@@ -60,11 +70,17 @@ Depuis `/admin/`, une fois connecté :
 - **Calendrier** : ajouter, modifier, supprimer des événements (titre,
   date, heure, description). Le calendrier et la liste « à venir » du site
   public se mettent à jour immédiatement.
-- **Formations** : gérer les cartes de la page Formations (titre, résumé,
-  détails affichés en popup, icône, ordre d'affichage).
+- **Formations** : gérer les cartes de la section Formations (titre,
+  résumé, détails affichés dans le panneau latéral, icône, profondeur
+  affichée, ordre d'affichage — profondeur croissante recommandée).
 - **Tarifs** : gérer les lignes du tableau d'inscriptions.
-- **Contenu du site** : modifier les textes (titre et sous-titre de
-  l'accueil, adresse, email, lien Facebook, mentions légales...).
+- **Documents (PDF)** : uploader/remplacer/retirer les PDF proposés sur la
+  page Inscription (fiche d'adhésion, CACI, autorisation parentale). Seuls
+  les fichiers `.pdf` sont acceptés (10 Mo max, type MIME vérifié). Tant
+  qu'un document n'est pas uploadé, la page affiche « à venir » au lieu
+  d'un lien mort.
+- **Contenu du site** : modifier les textes (hero, chiffres clés,
+  présentation du club, coordonnées, SEO, mentions légales...).
 - **Mon compte** : changer l'identifiant ou le mot de passe.
 
 ## Mot de passe oublié
@@ -82,6 +98,8 @@ peux le réinitialiser sans SSH :
   sur la connexion.
 - `config/`, `database/` et les dossiers `includes/` sont bloqués à l'accès
   web direct via `.htaccess`.
+- Les PDF uploadés sont validés (extension + type MIME réel) et le dossier
+  `uploads/documents/` interdit toute exécution de script via `.htaccess`.
 - Les pages `/admin/*` sont marquées `noindex` et nécessitent une session
   authentifiée.
 
