@@ -91,14 +91,16 @@ CREATE TABLE IF NOT EXISTS documents (
 
 INSERT INTO site_content (content_key, content_value) VALUES
 ('site_name',        'Plongée Carpentras - CSCV'),
-('hero_title',        'CLUB SUBAQUATIQUE DU COMTAT VENAISSIN'),
-('hero_subtitle',     'Découvrez les merveilles du monde sous-marin'),
+('hero_eyebrow',      'Carpentras · Vaucluse · Club affilié FFESSM'),
+('hero_title',        'Apprenez à plonger, à Carpentras'),
+('hero_subtitle',     'Baptêmes, formations fédérales et sorties en mer, encadrés par des moniteurs diplômés. Du premier souffle sous l’eau au niveau d’encadrement.'),
 ('hero_cta_baptism',  'Baptême de plongée'),
 ('hero_cta_join',     'Nous rejoindre'),
 ('hero_cta_text',     'Rejoignez-nous sur Facebook'),
 ('facebook_url',      'https://www.facebook.com/PlongeeCarpentras'),
 ('contact_address',   'Piscine municipale, Rue du Mont de Piété, 84200 Carpentras'),
 ('contact_email',     'contact@plongeecarpentras.fr'),
+('contact_hours',    'Entraînements à la piscine municipale pendant la saison. Consultez le calendrier pour les créneaux et les dates de sortie.'),
 ('association_name',  'Club Subaquatique du Comtat Venaissin'),
 ('footer_text',       '© 2026 Plongée Carpentras - CSCV. Tous droits réservés.'),
 ('pricing_note',      '*membre du bureau directeur / encadrant noté au planning.'),

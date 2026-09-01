@@ -1,403 +1,439 @@
-/* Plongée Carpentras — interactions front (menu, popups, calendrier, immersion) */
-document.addEventListener('DOMContentLoaded', () => {
-    initHeader();
-    initMobileMenu();
-    initBackToTop();
-    initLegalPopup();
-    initCalendar();
-    initFormationPanel();
-    initDoclessNotice();
-    initDepthExperience();
-});
+/* =====================================================================
+   Plongée Carpentras — CSCV
+   Comportements de l'interface. Vanilla, zéro dépendance, chargé en defer.
+   Tout ce qui est ici est un « plus » : la page reste utilisable et
+   lisible si ce fichier ne se charge pas.
+   ===================================================================== */
+(() => {
+    'use strict';
 
-/* ---------- Header : fond opaque au scroll ---------- */
-function initHeader() {
-    const header = document.getElementById('site-header');
-    if (!header) return;
+    const $  = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+    const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 30);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-}
+    /* -----------------------------------------------------------------
+       Thème clair / sombre
+       L'état initial est posé par un script en ligne dans le <head> pour
+       éviter le flash ; ici on ne gère que la bascule manuelle.
+       ----------------------------------------------------------------- */
+    function initTheme() {
+        const toggle = $('#theme-toggle');
+        if (!toggle) return;
 
-/* ---------- Menu mobile ---------- */
-function initMobileMenu() {
-    const toggle = document.getElementById('menu-toggle');
-    const links = document.getElementById('nav-links');
-    if (!toggle || !links) return;
+        const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+        const currentIsDark = () => {
+            const forced = document.documentElement.dataset.theme;
+            return forced ? forced === 'dark' : systemDark.matches;
+        };
 
-    const close = () => {
-        toggle.classList.remove('open');
-        links.classList.remove('open');
-        toggle.setAttribute('aria-expanded', 'false');
-    };
+        const syncLabel = () => {
+            const dark = currentIsDark();
+            toggle.setAttribute('aria-label', dark ? 'Passer en thème clair' : 'Passer en thème sombre');
+            toggle.setAttribute('aria-pressed', String(dark));
+        };
 
-    toggle.addEventListener('click', () => {
-        const isOpen = links.classList.toggle('open');
-        toggle.classList.toggle('open', isOpen);
-        toggle.setAttribute('aria-expanded', String(isOpen));
-    });
-
-    links.querySelectorAll('a').forEach((link) => link.addEventListener('click', close));
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
-}
-
-/* ---------- Bouton retour en haut ---------- */
-function initBackToTop() {
-    const btn = document.getElementById('back-to-top');
-    if (!btn) return;
-
-    window.addEventListener('scroll', () => {
-        btn.classList.toggle('visible', window.scrollY > 500);
-    }, { passive: true });
-
-    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-}
-
-/* ---------- Popups génériques (fermeture, overlay, Échap) ---------- */
-function openPopup(popup) {
-    popup.classList.add('visible');
-    document.body.style.overflow = 'hidden';
-}
-
-function closePopup(popup) {
-    popup.classList.remove('visible');
-    document.body.style.overflow = '';
-}
-
-function wireClosablePopup(popup) {
-    popup.querySelectorAll('.close-popup').forEach((btn) => btn.addEventListener('click', () => closePopup(popup)));
-    popup.addEventListener('click', (e) => { if (e.target === popup) closePopup(popup); });
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && popup.classList.contains('visible')) closePopup(popup);
-    });
-}
-
-/* ---------- Popup mentions légales ---------- */
-function initLegalPopup() {
-    const popup = document.getElementById('mentions-legales-popup');
-    const link = document.getElementById('mentions-legales-link');
-    if (!popup || !link) return;
-
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        openPopup(popup);
-    });
-
-    wireClosablePopup(popup);
-}
-
-/* ---------- Petit message quand un document n'est pas encore disponible ---------- */
-function initDoclessNotice() {
-    document.querySelectorAll('.doc-unavailable').forEach((el) => {
-        el.setAttribute('title', 'Document pas encore mis en ligne — contactez le club.');
-    });
-}
-
-/* ---------- Panneau latéral "détail formation" ---------- */
-function initFormationPanel() {
-    const cards = document.querySelectorAll('.formation-card');
-    const overlay = document.querySelector('.panel-overlay');
-    const panel = document.querySelector('.formation-panel');
-    if (!cards.length || !panel || !overlay) return;
-
-    const iconEl = panel.querySelector('.formation-icon');
-    const titleEl = panel.querySelector('#panel-title');
-    const depthEl = panel.querySelector('#panel-depth');
-    const descEl = panel.querySelector('#panel-description');
-
-    function open(card) {
-        titleEl.textContent = card.dataset.title || '';
-        depthEl.textContent = card.dataset.depth || '';
-        descEl.textContent = card.dataset.details || '';
-        const sourceIcon = card.querySelector('.formation-icon');
-        if (sourceIcon) iconEl.innerHTML = sourceIcon.innerHTML;
-        overlay.classList.add('visible');
-        panel.classList.add('visible');
-        document.body.style.overflow = 'hidden';
-        panel.querySelector('.close-panel')?.focus();
-    }
-
-    function close() {
-        overlay.classList.remove('visible');
-        panel.classList.remove('visible');
-        document.body.style.overflow = '';
-    }
-
-    cards.forEach((card) => {
-        card.addEventListener('click', () => open(card));
-        card.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(card); }
+        toggle.addEventListener('click', () => {
+            const next = currentIsDark() ? 'light' : 'dark';
+            document.documentElement.dataset.theme = next;
+            try { localStorage.setItem('cscv-theme', next); } catch (e) { /* navigation privée */ }
+            syncLabel();
         });
-    });
 
-    overlay.addEventListener('click', close);
-    panel.querySelector('.close-panel')?.addEventListener('click', close);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
-}
-
-/* ---------- Calendrier interactif ---------- */
-function initCalendar() {
-    const body = document.getElementById('calendarBody');
-    if (!body) return;
-
-    const events = Array.isArray(window.CSCV_EVENTS) ? window.CSCV_EVENTS : [];
-    const eventsByDate = new Map();
-    events.forEach((ev) => {
-        if (!eventsByDate.has(ev.date)) eventsByDate.set(ev.date, []);
-        eventsByDate.get(ev.date).push(ev);
-    });
-
-    const monthYearLabel = document.getElementById('monthYear');
-    const prevBtn = document.getElementById('prevMonth');
-    const nextBtn = document.getElementById('nextMonth');
-    const modal = document.getElementById('eventModal');
-    const modalTitle = document.getElementById('modalEventTitle');
-    const modalDate = document.getElementById('modalEventDate');
-    const modalDetails = document.getElementById('modalEventDetails');
-
-    const MONTHS = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-    const today = new Date();
-
-    const firstUpcoming = events
-        .map((ev) => new Date(ev.date + 'T00:00:00'))
-        .filter((d) => d >= new Date(today.getFullYear(), today.getMonth(), today.getDate()))
-        .sort((a, b) => a - b)[0];
-
-    let viewYear = (firstUpcoming || today).getFullYear();
-    let viewMonth = (firstUpcoming || today).getMonth();
-
-    function toDateKey(y, m, d) {
-        return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        systemDark.addEventListener('change', syncLabel);
+        syncLabel();
     }
 
-    function render() {
-        body.innerHTML = '';
-        monthYearLabel.textContent = `${MONTHS[viewMonth]} ${viewYear}`;
+    /* -----------------------------------------------------------------
+       En-tête : ombre au scroll + menu mobile
+       ----------------------------------------------------------------- */
+    /* Sentinelle placée tout en haut du document : elle sert à la fois à
+       l'ombre de l'en-tête et au bouton « retour en haut ». */
+    let topSentinel = null;
+    function getTopSentinel() {
+        if (topSentinel) return topSentinel;
+        topSentinel = document.createElement('div');
+        topSentinel.setAttribute('aria-hidden', 'true');
+        topSentinel.style.cssText = 'position:absolute;top:0;height:1px;width:1px;pointer-events:none';
+        document.body.prepend(topSentinel);
+        return topSentinel;
+    }
 
-        const firstDayIndex = (new Date(viewYear, viewMonth, 1).getDay() + 6) % 7; // lundi = 0
-        const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    function initHeader() {
+        const header = $('#site-header');
+        const toggle = $('#menu-toggle');
 
-        let row = document.createElement('tr');
-        for (let i = 0; i < firstDayIndex; i++) {
-            row.appendChild(makeCell('', ['day-cell', 'empty']));
+        if (header && 'IntersectionObserver' in window) {
+            new IntersectionObserver(
+                ([entry]) => header.classList.toggle('is-stuck', !entry.isIntersecting),
+                { threshold: 1 }
+            ).observe(getTopSentinel());
         }
 
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dateKey = toDateKey(viewYear, viewMonth, day);
-            const dayEvents = eventsByDate.get(dateKey);
-            const classes = ['day-cell'];
-            const isToday = viewYear === today.getFullYear() && viewMonth === today.getMonth() && day === today.getDate();
-            if (isToday) classes.push('today');
-            if (dayEvents) classes.push('has-event');
+        if (!toggle) return;
+        const close = () => toggle.setAttribute('aria-expanded', 'false');
 
-            const cell = makeCell(String(day), classes);
-            if (dayEvents) {
-                cell.addEventListener('click', () => showEvents(dayEvents, dateKey));
-            }
+        toggle.addEventListener('click', () => {
+            const open = toggle.getAttribute('aria-expanded') === 'true';
+            toggle.setAttribute('aria-expanded', String(!open));
+            toggle.setAttribute('aria-label', open ? 'Ouvrir le menu' : 'Fermer le menu');
+        });
 
-            row.appendChild(cell);
-            if ((firstDayIndex + day) % 7 === 0) {
-                body.appendChild(row);
-                row = document.createElement('tr');
-            }
+        // On referme dès qu'on part quelque part, ou avec Échap.
+        $$('#nav-links a').forEach((link) => link.addEventListener('click', close));
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+        window.addEventListener('resize', () => { if (window.innerWidth > 900) close(); });
+    }
+
+    /* -----------------------------------------------------------------
+       Apparitions au scroll — uniquement si le navigateur ne sait pas
+       encore faire `animation-timeline: view()` tout seul.
+       ----------------------------------------------------------------- */
+    function initReveal() {
+        const root = document.documentElement;
+        const nativeScrollAnimations = window.CSS && CSS.supports('animation-timeline', 'view()');
+        const targets = $$('[data-reveal]');
+
+        if (nativeScrollAnimations) return;   // le navigateur s'en charge seul
+
+        if (reducedMotion() || !('IntersectionObserver' in window)) {
+            root.classList.remove('reveal-js');
+            targets.forEach((el) => el.classList.add('is-in'));
+            return;
         }
 
-        if (row.children.length) {
-            while (row.children.length < 7) row.appendChild(makeCell('', ['day-cell', 'empty']));
+        // Confirme au script du <head> que le repli est bien pris en charge
+        // (sans quoi il redonne la visibilité à tout au bout de 3 secondes).
+        root.dataset.revealReady = '1';
+        root.classList.add('reveal-js');
+
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add('is-in');
+                io.unobserve(entry.target);
+            });
+        }, { rootMargin: '0px 0px -12% 0px', threshold: 0.1 });
+
+        targets.forEach((el) => io.observe(el));
+    }
+
+    /* -----------------------------------------------------------------
+       Filtres des formations
+       ----------------------------------------------------------------- */
+    function initFilters() {
+        const bar = $('#formation-filters');
+        const grid = $('#formations-grid');
+        if (!bar || !grid) return;
+
+        const cards = $$('.formation', grid);
+        const empty = $('#formations-empty');
+
+        bar.addEventListener('click', (e) => {
+            const chip = e.target.closest('[data-filter]');
+            if (!chip) return;
+
+            const filter = chip.dataset.filter;
+            $$('[data-filter]', bar).forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+
+            let shown = 0;
+            cards.forEach((card) => {
+                const tags = (card.dataset.tags || '').split(' ');
+                const match = filter === 'all' || tags.includes(filter);
+                card.hidden = !match;
+                if (match) shown++;
+            });
+
+            if (empty) empty.hidden = shown > 0;
+            grid.setAttribute('aria-live', 'polite');
+        });
+    }
+
+    /* -----------------------------------------------------------------
+       Détail d'une formation dans un <dialog> natif
+       ----------------------------------------------------------------- */
+    function initFormationDialog() {
+        const dialog = $('#formation-dialog');
+        if (!dialog || typeof dialog.showModal !== 'function') return;
+
+        const fields = {
+            title: $('#fd-title', dialog),
+            depth: $('#fd-depth', dialog),
+            text:  $('#fd-text', dialog),
+            icon:  $('#fd-icon', dialog),
+        };
+
+        $$('.formation-open').forEach((trigger) => {
+            trigger.addEventListener('click', () => {
+                const card = trigger.closest('.formation');
+                if (!card) return;
+                fields.title.textContent = card.dataset.title || '';
+                fields.depth.textContent = card.dataset.depth || '';
+                fields.text.textContent  = card.dataset.details || '';
+                const svg = card.querySelector('.formation-icon svg');
+                if (svg && fields.icon) fields.icon.innerHTML = svg.outerHTML;
+                dialog.showModal();
+            });
+        });
+
+        bindDialogClose(dialog);
+    }
+
+    /* Ferme un <dialog> au clic sur le fond ou sur le bouton de fermeture. */
+    function bindDialogClose(dialog) {
+        dialog.addEventListener('click', (e) => {
+            if (e.target.closest('[data-close]')) { dialog.close(); return; }
+            // Clic en dehors de la boîte : on compare aux limites réelles.
+            const box = dialog.getBoundingClientRect();
+            const outside = e.clientX < box.left || e.clientX > box.right ||
+                            e.clientY < box.top  || e.clientY > box.bottom;
+            if (outside && e.target === dialog) dialog.close();
+        });
+    }
+
+    function initSimpleDialogs() {
+        $$('[data-dialog-open]').forEach((trigger) => {
+            const dialog = document.getElementById(trigger.dataset.dialogOpen);
+            if (!dialog || typeof dialog.showModal !== 'function') return;
+            trigger.addEventListener('click', (e) => { e.preventDefault(); dialog.showModal(); });
+            bindDialogClose(dialog);
+        });
+    }
+
+    /* -----------------------------------------------------------------
+       Inclinaison 3D des cartes au survol (pointeur fin uniquement)
+       ----------------------------------------------------------------- */
+    function initTilt() {
+        if (reducedMotion() || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+
+        $$('[data-tilt]').forEach((card) => {
+            let frame = null;
+
+            const move = (e) => {
+                if (frame) return;
+                frame = requestAnimationFrame(() => {
+                    frame = null;
+                    const r = card.getBoundingClientRect();
+                    const px = (e.clientX - r.left) / r.width - 0.5;
+                    const py = (e.clientY - r.top) / r.height - 0.5;
+                    card.style.setProperty('--tilt-y', `${(px * 7).toFixed(2)}deg`);
+                    card.style.setProperty('--tilt-x', `${(-py * 7).toFixed(2)}deg`);
+                });
+            };
+            const reset = () => {
+                if (frame) { cancelAnimationFrame(frame); frame = null; }
+                card.style.setProperty('--tilt-y', '0deg');
+                card.style.setProperty('--tilt-x', '0deg');
+            };
+
+            card.addEventListener('pointermove', move);
+            card.addEventListener('pointerleave', reset);
+            card.addEventListener('focusout', reset);
+        });
+    }
+
+    /* -----------------------------------------------------------------
+       HUD « ordinateur de plongée » : profondeur simulée depuis la
+       position de scroll, section courante, prochain rendez-vous.
+       ----------------------------------------------------------------- */
+    function initHud() {
+        const hud = $('#dive-hud');
+        if (!hud) return;
+
+        const depthOut = $('#hud-depth', hud);
+        const bar      = $('#hud-bar', hud);
+        const label    = $('#hud-section', hud);
+        const maxDepth = Number(hud.dataset.maxDepth || 60);
+        const closeBtn = $('#hud-close', hud);
+
+        let ticking = false;
+        const update = () => {
+            ticking = false;
+            const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = scrollable > 0 ? Math.min(1, Math.max(0, window.scrollY / scrollable)) : 0;
+            const depth = Math.round(progress * maxDepth);
+
+            depthOut.firstChild.nodeValue = String(depth);
+            bar.style.setProperty('--hud-fill', `${(progress * 100).toFixed(1)}%`);
+            hud.classList.toggle('is-visible', window.scrollY > 260 && !hud.dataset.dismissed);
+        };
+
+        window.addEventListener('scroll', () => {
+            if (ticking) return;
+            ticking = true;
+            requestAnimationFrame(update);
+        }, { passive: true });
+
+        // Section courante : la dernière traversée vers le haut de l'écran.
+        const sections = $$('[data-hud-label]');
+        if (sections.length && label) {
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) label.textContent = entry.target.dataset.hudLabel;
+                });
+            }, { rootMargin: '-45% 0px -45% 0px' });
+            sections.forEach((s) => io.observe(s));
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                hud.dataset.dismissed = '1';
+                hud.classList.remove('is-visible');
+            });
+        }
+
+        update();
+    }
+
+    /* Compte à rebours du prochain rendez-vous (hero + HUD). */
+    function initCountdown() {
+        const targets = $$('[data-countdown]');
+        if (!targets.length) return;
+
+        targets.forEach((el) => {
+            const date = new Date(`${el.dataset.countdown}T00:00:00`);
+            if (Number.isNaN(date.getTime())) return;
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const days = Math.round((date - today) / 86400000);
+
+            el.textContent = days === 0 ? "aujourd'hui"
+                : days === 1 ? 'demain'
+                : days > 1 ? `dans ${days} jours`
+                : 'passé';
+        });
+    }
+
+    /* -----------------------------------------------------------------
+       Bouton « retour en haut »
+       ----------------------------------------------------------------- */
+    function initToTop() {
+        const btn = $('#to-top');
+        if (!btn) return;
+
+        if ('IntersectionObserver' in window) {
+            new IntersectionObserver(([entry]) => {
+                btn.classList.toggle('is-visible', !entry.isIntersecting);
+            }, { rootMargin: '400px 0px 0px 0px' }).observe(getTopSentinel());
+        }
+
+        btn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: reducedMotion() ? 'auto' : 'smooth' });
+        });
+    }
+
+    /* -----------------------------------------------------------------
+       Calendrier mensuel (page calendrier.php)
+       ----------------------------------------------------------------- */
+    function initCalendar() {
+        const body = $('#calendar-body');
+        if (!body) return;
+
+        const events = Array.isArray(window.CSCV_EVENTS) ? window.CSCV_EVENTS : [];
+        const byDate = new Map(events.map((ev) => [ev.date, ev]));
+        const label  = $('#calendar-label');
+        const dialog = $('#event-dialog');
+
+        const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                            'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+
+        const today = new Date();
+        const todayKey = toKey(today);
+        let view = new Date(today.getFullYear(), today.getMonth(), 1);
+
+        function toKey(d) {
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function render() {
+            label.textContent = `${monthNames[view.getMonth()]} ${view.getFullYear()}`;
+            body.textContent = '';
+
+            const year = view.getFullYear();
+            const month = view.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            // getDay() : 0 = dimanche. On veut une semaine commençant le lundi.
+            const offset = (new Date(year, month, 1).getDay() + 6) % 7;
+
+            let row = document.createElement('tr');
+            for (let i = 0; i < offset; i++) row.appendChild(emptyCell());
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                if (row.children.length === 7) { body.appendChild(row); row = document.createElement('tr'); }
+
+                const key = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const ev = byDate.get(key);
+                const td = document.createElement('td');
+                const cell = document.createElement(ev ? 'button' : 'div');
+
+                cell.className = 'day';
+                cell.textContent = String(day);
+                if (key === todayKey) cell.classList.add('is-today');
+
+                if (ev) {
+                    cell.classList.add('has-event');
+                    cell.type = 'button';
+                    cell.setAttribute('aria-label', `${day} ${monthNames[month]} — ${ev.title}`);
+                    cell.addEventListener('click', () => openEvent(ev));
+                }
+
+                td.appendChild(cell);
+                row.appendChild(td);
+            }
+
+            while (row.children.length < 7) row.appendChild(emptyCell());
             body.appendChild(row);
         }
-    }
 
-    function makeCell(text, classes) {
-        const td = document.createElement('td');
-        const span = document.createElement('span');
-        span.className = classes.join(' ');
-        span.textContent = text;
-        td.appendChild(span);
-        return td;
-    }
-
-    function showEvents(dayEvents, dateKey) {
-        if (!modal) return;
-        const date = new Date(dateKey + 'T00:00:00');
-        modalTitle.textContent = dayEvents.map((ev) => ev.title).join(', ');
-        modalDate.textContent = date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-            + (dayEvents[0].time ? ` · ${dayEvents[0].time.slice(0, 5)}` : '');
-        modalDetails.textContent = dayEvents.map((ev) => ev.description).filter(Boolean).join('\n\n');
-        openPopup(modal);
-    }
-
-    prevBtn?.addEventListener('click', () => {
-        viewMonth -= 1;
-        if (viewMonth < 0) { viewMonth = 11; viewYear -= 1; }
-        render();
-    });
-
-    nextBtn?.addEventListener('click', () => {
-        viewMonth += 1;
-        if (viewMonth > 11) { viewMonth = 0; viewYear += 1; }
-        render();
-    });
-
-    if (modal) wireClosablePopup(modal);
-
-    render();
-}
-
-/* =====================================================================
-   Expérience "descente en profondeur" : Lenis (smooth scroll) + GSAP/
-   ScrollTrigger (apparitions en stagger réversibles, parallaxe légère,
-   fond qui s'assombrit, indicateur de profondeur). Se dégrade
-   proprement si les librairies CDN ne chargent pas (scroll natif +
-   apparitions via IntersectionObserver).
-   ===================================================================== */
-function initDepthExperience() {
-    const hasGsap = typeof window.gsap !== 'undefined' && typeof window.ScrollTrigger !== 'undefined';
-
-    if (hasGsap) {
-        document.documentElement.classList.add('gsap-ready');
-        gsap.registerPlugin(ScrollTrigger);
-        initLenis();
-        initGsapReveals();
-        initGsapParallax();
-    } else {
-        document.documentElement.classList.add('no-gsap');
-        initFallbackReveals();
-    }
-
-    initDepthBackdrop(hasGsap);
-}
-
-function initLenis() {
-    if (typeof window.Lenis === 'undefined') return;
-
-    const lenis = new Lenis({ duration: 1.05, smoothWheel: true });
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((time) => lenis.raf(time * 1000));
-    gsap.ticker.lagSmoothing(0);
-}
-
-function initGsapReveals() {
-    const groups = new Map();
-    document.querySelectorAll('[data-reveal]').forEach((el) => {
-        const parent = el.parentElement;
-        if (!groups.has(parent)) groups.set(parent, []);
-        groups.get(parent).push(el);
-    });
-
-    groups.forEach((els) => {
-        els.forEach((el, i) => {
-            gsap.fromTo(el,
-                { opacity: 0, y: 34 },
-                {
-                    opacity: 1,
-                    y: 0,
-                    duration: .7,
-                    ease: 'power2.out',
-                    delay: (i % 8) * 0.08,
-                    scrollTrigger: {
-                        trigger: el,
-                        start: 'top 88%',
-                        toggleActions: 'play reverse play reverse',
-                    },
-                }
-            );
-        });
-    });
-}
-
-function initGsapParallax() {
-    document.querySelectorAll('[data-parallax]').forEach((el) => {
-        gsap.to(el, {
-            yPercent: -10,
-            ease: 'none',
-            scrollTrigger: {
-                trigger: el,
-                start: 'top bottom',
-                end: 'bottom top',
-                scrub: true,
-            },
-        });
-    });
-}
-
-function initFallbackReveals() {
-    const items = document.querySelectorAll('[data-reveal]');
-    if (!items.length) return;
-
-    if (!('IntersectionObserver' in window)) {
-        items.forEach((el) => el.classList.add('in-view'));
-        return;
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('in-view');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.15 });
-
-    items.forEach((el) => observer.observe(el));
-}
-
-function initDepthBackdrop(hasGsap) {
-    const backdrop = document.querySelector('.ocean-backdrop');
-    if (!backdrop) return;
-
-    const rail = document.querySelector('.depth-rail');
-    const fill = document.querySelector('.depth-rail-fill');
-    const dot = document.querySelector('.depth-rail-dot');
-    const diveEnd = document.querySelector('.site-footer');
-
-    const stops = [
-        { at: 0, rgb: [10, 95, 119] },
-        { at: .55, rgb: [10, 61, 92] },
-        { at: 1, rgb: [4, 16, 31] },
-    ];
-
-    function lerp(a, b, t) { return a + (b - a) * t; }
-
-    function colorAt(progress) {
-        for (let i = 0; i < stops.length - 1; i++) {
-            if (progress >= stops[i].at && progress <= stops[i + 1].at) {
-                const t = (progress - stops[i].at) / (stops[i + 1].at - stops[i].at);
-                const c1 = stops[i].rgb;
-                const c2 = stops[i + 1].rgb;
-                return `rgb(${Math.round(lerp(c1[0], c2[0], t))}, ${Math.round(lerp(c1[1], c2[1], t))}, ${Math.round(lerp(c1[2], c2[2], t))})`;
-            }
+        function emptyCell() {
+            const td = document.createElement('td');
+            const div = document.createElement('div');
+            div.className = 'day is-empty';
+            td.appendChild(div);
+            return td;
         }
-        const last = stops[stops.length - 1].rgb;
-        return `rgb(${last.join(', ')})`;
-    }
 
-    function update(progress) {
-        backdrop.style.backgroundColor = colorAt(progress);
-        if (rail && fill && dot) {
-            rail.classList.toggle('visible', progress > 0.02 && progress < 0.985);
-            fill.style.height = `${progress * 100}%`;
-            dot.style.top = `${progress * 100}%`;
+        function openEvent(ev) {
+            if (!dialog || typeof dialog.showModal !== 'function') return;
+            $('#ev-title', dialog).textContent = ev.title;
+            $('#ev-meta', dialog).textContent = formatDate(ev.date) + (ev.time ? ` · ${ev.time.slice(0, 5)}` : '');
+            $('#ev-text', dialog).textContent = ev.description || '';
+            dialog.showModal();
         }
+
+        function formatDate(iso) {
+            const d = new Date(`${iso}T00:00:00`);
+            const days = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+            return `${days[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+        }
+
+        $('#cal-prev').addEventListener('click', () => { view.setMonth(view.getMonth() - 1); render(); });
+        $('#cal-next').addEventListener('click', () => { view.setMonth(view.getMonth() + 1); render(); });
+        if (dialog) bindDialogClose(dialog);
+
+        render();
     }
 
-    if (hasGsap) {
-        ScrollTrigger.create({
-            trigger: document.body,
-            start: 'top top',
-            end: () => `${diveEnd ? diveEnd.offsetTop : document.body.scrollHeight} top`,
-            scrub: true,
-            onUpdate: (self) => update(self.progress),
-        });
+    /* -----------------------------------------------------------------
+       Démarrage
+       ----------------------------------------------------------------- */
+    const boot = () => {
+        initTheme();
+        initHeader();
+        initReveal();
+        initFilters();
+        initFormationDialog();
+        initSimpleDialogs();
+        initTilt();
+        initHud();
+        initCountdown();
+        initToTop();
+        initCalendar();
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot);
     } else {
-        const onScroll = () => {
-            const max = (diveEnd ? diveEnd.offsetTop : document.body.scrollHeight) - window.innerHeight;
-            const progress = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-            update(progress);
-        };
-        window.addEventListener('scroll', onScroll, { passive: true });
-        window.addEventListener('resize', onScroll);
-        onScroll();
+        boot();
     }
-}
+})();

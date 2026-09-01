@@ -4,8 +4,9 @@ require_login();
 
 $groups = [
     'Page d\'accueil' => [
+        'hero_eyebrow'    => ['label' => 'Petite ligne au-dessus du titre (hero)', 'type' => 'text'],
         'hero_title'      => ['label' => 'Titre principal (hero)', 'type' => 'text'],
-        'hero_subtitle'   => ['label' => 'Sous-titre (hero)', 'type' => 'text'],
+        'hero_subtitle'   => ['label' => 'Sous-titre (hero)', 'type' => 'textarea'],
         'hero_cta_baptism'=> ['label' => 'Texte du bouton "Baptême"', 'type' => 'text'],
         'hero_cta_join'   => ['label' => 'Texte du bouton "Nous rejoindre"', 'type' => 'text'],
         'club_intro'      => ['label' => 'Texte de présentation du club', 'type' => 'textarea'],
@@ -23,6 +24,7 @@ $groups = [
         'association_name' => ['label' => 'Nom de l\'association', 'type' => 'text'],
         'contact_address'  => ['label' => 'Adresse', 'type' => 'text'],
         'contact_email'    => ['label' => 'Email de contact', 'type' => 'text'],
+        'contact_hours'    => ['label' => 'Créneaux / horaires affichés dans la section Contact', 'type' => 'textarea'],
         'facebook_url'     => ['label' => 'Lien Facebook', 'type' => 'text'],
         'footer_text'      => ['label' => 'Texte de copyright (pied de page)', 'type' => 'text'],
         'pricing_note'     => ['label' => 'Note sous le tableau des tarifs', 'type' => 'text'],

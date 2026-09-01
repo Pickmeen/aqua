@@ -102,3 +102,64 @@ function format_month_abbrev(string $sql_date): string
     $date = DateTime::createFromFormat('Y-m-d', $sql_date);
     return $date ? $mois[(int) $date->format('n') - 1] : '';
 }
+
+/**
+ * Étiquettes de filtrage déduites d'une formation (niveau, milieu, rôle).
+ * Elles alimentent les filtres de la section Formations côté public.
+ * Déduites du contenu plutôt que stockées : le backoffice reste simple,
+ * l'admin n'a pas de cases supplémentaires à cocher.
+ */
+function formation_tags(array $formation): array
+{
+    $tags = [];
+    $depth = trim($formation['depth_label'] ?? '');
+    $title = mb_strtolower($formation['title'] ?? '', 'UTF-8');
+    $icon  = $formation['icon'] ?? '';
+
+    $is_pool = mb_stripos($depth, 'piscine') !== false;
+    $tags[] = $is_pool ? 'piscine' : 'mer';
+
+    $beginner_titles = ['baptême', 'bapteme', 'enfant', 'niveau 1', 'découverte', 'decouverte'];
+    foreach ($beginner_titles as $needle) {
+        if (mb_strpos($title, $needle) !== false) { $tags[] = 'debutant'; break; }
+    }
+    if ($is_pool && !in_array('debutant', $tags, true)) {
+        $tags[] = 'debutant';
+    }
+
+    $supervising = in_array($icon, ['whistle', 'anchor'], true)
+        || mb_strpos($title, 'initiateur') !== false
+        || mb_strpos($title, 'niveau 4') !== false
+        || mb_strpos($title, 'moniteur') !== false;
+    if ($supervising) {
+        $tags[] = 'encadrement';
+        $tags = array_values(array_diff($tags, ['debutant']));
+    }
+
+    return array_values(array_unique($tags));
+}
+
+/** Nombre de jours (entier, signé) entre aujourd'hui et une date SQL. */
+function days_until(string $sql_date): ?int
+{
+    $target = DateTime::createFromFormat('Y-m-d', $sql_date);
+    if (!$target) {
+        return null;
+    }
+    $target->setTime(0, 0);
+    $today = new DateTime('today');
+
+    return (int) $today->diff($target)->format('%r%a');
+}
+
+/** Formulation lisible d'une échéance : « demain », « dans 12 jours »... */
+function countdown_label(string $sql_date): string
+{
+    $days = days_until($sql_date);
+    if ($days === null)  { return ''; }
+    if ($days < 0)       { return 'passé'; }
+    if ($days === 0)     { return "aujourd'hui"; }
+    if ($days === 1)     { return 'demain'; }
+
+    return 'dans ' . $days . ' jours';
+}
