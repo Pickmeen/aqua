@@ -71,10 +71,17 @@ site en ligne, invisible pour Google, sans Google Analytics et signalée
 par un bandeau. La procédure complète (préprod, liste de contrôle,
 bascule, retour arrière) est dans **[DEPLOIEMENT.md](DEPLOIEMENT.md)**.
 
-En résumé : déposez les fichiers dans un dossier `/preprod/`, créez-y un
-fichier vide nommé `preprod.flag`, et pointez `config/db.php` vers une
-base de test. Le fichier `preprod.flag` n'est jamais versionné, il ne peut
+En résumé : déposez les fichiers dans un dossier `/preprod/` et créez-y un
+fichier nommé `preprod.flag`. Le fichier n'est jamais versionné, il ne peut
 donc pas partir en production par accident.
+
+- **Si l'hébergement autorise plusieurs bases** : laissez `preprod.flag`
+  vide et pointez `config/db.php` vers une base de test. Tout est
+  testable, backoffice compris.
+- **S'il n'en autorise qu'une** : écrivez `readonly` dans `preprod.flag`
+  et gardez la base de production. Le site public s'affiche avec le
+  contenu réel, et le backoffice est verrouillé — aucune écriture n'est
+  possible, même en envoyant un formulaire directement.
 
 ## 1. Déploiement sur l'hébergement OVH
 

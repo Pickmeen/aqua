@@ -116,6 +116,10 @@ gtag('config', 'G-YSK54J1WP0');
 <?php if (is_preprod()): ?>
 <p class="env-banner" role="status">
     <b>Préproduction</b> — version de test, non indexée par Google.
+    <?php if (preprod_is_readonly()): ?>
+        Contenu réel du site, <strong>backoffice verrouillé</strong> : rien
+        de ce que vous faites ici ne modifie le site en ligne.
+    <?php endif; ?>
     Le vrai site reste <a href="<?= e($site_base_url) ?>">plongeecarpentras.fr</a>.
 </p>
 <?php endif; ?>

@@ -4,11 +4,38 @@ Ce document décrit comment faire tourner une **préproduction** (une copie
 du site, en ligne, invisible pour Google et protégée par mot de passe),
 puis comment basculer en production une fois que tout est validé.
 
+## Est-ce que ça marche sur mon offre d'hébergement ?
+
+Oui, y compris sur l'offre la plus basique. La préproduction n'a besoin de
+rien d'exotique : un dossier de plus, du PHP, et un accès FTP. Pas de SSH,
+pas de sous-domaine, pas de certificat supplémentaire, pas de tâche cron.
+
+Le **seul point à vérifier** est le nombre de bases de données MySQL
+incluses dans votre offre. Pour le savoir : Manager OVH >
+*Hébergements* > votre hébergement > onglet **Bases de données**. Vous y
+voyez les bases existantes et le quota de l'offre.
+
+Deux cas, tous les deux prévus :
+
+| Votre offre autorise… | Ce que vous faites | Ce que vous pouvez tester |
+|---|---|---|
+| **Au moins 2 bases** | Vous créez une base de test dédiée | **Tout**, backoffice compris |
+| **Une seule base** | La préprod pointe sur la base de production, **en lecture seule** | Tout le site public, avec le contenu réel. Le backoffice est verrouillé |
+
+Le mode lecture seule n'est pas une promesse : le backoffice répond une
+page d'erreur et **refuse toute écriture**, y compris si un formulaire est
+envoyé directement. Concrètement, il est impossible d'abîmer le site en
+ligne depuis la préprod. Voir l'étape 1.4b.
+
+Dans le cas « une seule base », vous testerez le backoffice après la
+bascule, directement en production — ce qui est sans danger : il n'a pas
+changé dans cette refonte.
+
 ## En deux mots
 
 | | Combien de temps | Ce qui prend le temps |
 |---|---|---|
-| Mettre la préprod en place | **20 à 30 min** la première fois | La création de la base de données par OVH (5 à 30 min, en arrière-plan) |
+| Mettre la préprod en place | **20 à 30 min** la première fois, ou **10 min** en mode lecture seule | La création de la base de données par OVH (5 à 30 min, en arrière-plan). En mode lecture seule il n'y a aucune base à créer |
 | Tester tranquillement | Le temps que vous voulez | — |
 | **Basculer en production** | **5 à 10 min** | Uniquement l'envoi des fichiers par FTP |
 | Revenir en arrière si problème | **5 min** | Réenvoyer la sauvegarde de l'ancien site |
@@ -41,11 +68,9 @@ Dans le Manager OVH : *Hébergements > votre hébergement > Bases de
 données > Créer une base de données*. Notez le serveur, le nom,
 l'utilisateur et le mot de passe.
 
-> **Si votre offre n'autorise qu'une seule base** : vous pouvez faire
-> pointer la préprod sur la base de production **à condition de ne rien
-> enregistrer depuis le backoffice de la préprod** — vous modifieriez le
-> vrai site. Dans ce cas, testez uniquement l'affichage public, et testez
-> le backoffice plus tard, après la bascule.
+> **Si votre offre n'autorise qu'une seule base**, sautez cette étape :
+> vous utiliserez le mode lecture seule décrit à l'étape 1.4b, qui est
+> conçu exactement pour ce cas.
 
 La création est asynchrone : OVH vous prévient par e-mail quand la base
 est prête. C'est l'étape la plus longue, et la seule où il faut attendre.
@@ -77,7 +102,7 @@ Sa seule présence suffit. Le site détecte alors qu'il est en test et :
 Ce fichier n'est pas versionné dans Git : il ne peut donc pas partir en
 production par accident.
 
-### 1.4 Renseigner la connexion à la base
+### 1.4a Renseigner la connexion à la base (offre avec 2 bases ou plus)
 
 Éditez `preprod/config/db.php` **sur le serveur** avec les identifiants de
 la base de test créée à l'étape 1.1 :
@@ -89,7 +114,28 @@ define('DB_USER', 'xxxxxxx');
 define('DB_PASS', 'xxxxxxx');
 ```
 
-### 1.5 Remplir la base de test
+### 1.4b Mode lecture seule (offre avec une seule base)
+
+Si vous n'avez qu'une base, ne touchez pas à `preprod/config/db.php` : la
+préprod utilise la base de production, donc les vrais textes, les vraies
+formations, les vrais tarifs et les vraies dates. C'est le test le plus
+fidèle qui soit.
+
+Pour que ce soit sans danger, écrivez le mot suivant dans le fichier
+`preprod/preprod.flag` (au lieu de le laisser vide) :
+
+```
+readonly
+```
+
+Le backoffice de la préprod renvoie alors une page « Backoffice
+verrouillé » et refuse toute écriture. Le site public, lui, reste
+entièrement consultable : il ne fait que des lectures.
+
+Passez ensuite directement à l'étape 1.8 — il n'y a ni base à remplir, ni
+compte à créer.
+
+### 1.5 Remplir la base de test (uniquement si vous avez suivi 1.4a)
 
 Deux possibilités, au choix :
 
@@ -129,7 +175,7 @@ SSH avec `htpasswd -nb club motdepasse`.
 > tout référencement. Le mot de passe évite simplement qu'un visiteur
 > tombe dessus par hasard.
 
-### 1.7 Créer un compte administrateur de test
+### 1.7 Créer un compte administrateur de test (uniquement après 1.4a)
 
 Ouvrez `https://www.plongeecarpentras.fr/preprod/admin/setup.php` et
 créez un compte. (Si vous avez importé une copie de la base de
@@ -160,8 +206,11 @@ doit être visible. Voir la liste de contrôle plus bas.
       après rechargement.
 - [ ] Sur téléphone : le menu s'ouvre et se referme, la barre d'actions
       du bas est présente.
-- [ ] Backoffice : connexion, modification d'un texte, ajout d'un
-      événement, upload d'un PDF.
+- [ ] Backoffice — **si vous avez une base dédiée** : connexion,
+      modification d'un texte, ajout d'un événement, upload d'un PDF.
+      **En mode lecture seule** : vérifiez au contraire que `/preprod/admin/`
+      affiche bien la page « Backoffice verrouillé ». C'est la preuve que
+      la préprod ne peut pas toucher au site en ligne.
 - [ ] Testez sur un vrai téléphone, pas seulement en réduisant la fenêtre.
 
 ---

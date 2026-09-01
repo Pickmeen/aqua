@@ -177,8 +177,43 @@ function is_preprod(): bool
     static $flag = null;
 
     if ($flag === null) {
-        $flag = file_exists(dirname(__DIR__) . '/preprod.flag');
+        $flag = file_exists(preprod_flag_path());
     }
 
     return $flag;
+}
+
+/** Chemin du marqueur de préproduction. */
+function preprod_flag_path(): string
+{
+    return dirname(__DIR__) . '/preprod.flag';
+}
+
+/**
+ * Vrai si cette préproduction partage la base de données de production et
+ * doit donc être en lecture seule.
+ *
+ * S'active en écrivant le mot `readonly` dans `preprod.flag`. Utile quand
+ * l'hébergement n'autorise qu'une seule base : la préprod affiche alors le
+ * vrai contenu, mais le backoffice est verrouillé — impossible de modifier
+ * le site en ligne depuis la copie de test.
+ *
+ * La garantie est solide parce que toutes les écritures du projet passent
+ * sans exception par `admin/includes/auth.php` : le site public, lui, ne
+ * fait que des SELECT.
+ */
+function preprod_is_readonly(): bool
+{
+    static $readonly = null;
+
+    if ($readonly === null) {
+        $readonly = false;
+        $path = preprod_flag_path();
+
+        if (is_preprod() && is_readable($path)) {
+            $readonly = stripos((string) file_get_contents($path), 'readonly') !== false;
+        }
+    }
+
+    return $readonly;
 }
