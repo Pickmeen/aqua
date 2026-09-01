@@ -2,3 +2,7 @@
 uploads/documents/*
 !uploads/documents/.htaccess
 !uploads/documents/.gitkeep
+
+# Marqueur de préproduction : posé à la main sur le serveur de test,
+# jamais versionné pour qu'il ne parte jamais en production.
+preprod.flag

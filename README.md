@@ -64,6 +64,18 @@ formations.php, contact.php        Redirections 301 vers les ancres de index.php
 admin/                Backoffice (protégé par mot de passe)
 ```
 
+## Tester avant de mettre en ligne
+
+Avant toute mise en production, montez une préproduction : une copie du
+site en ligne, invisible pour Google, sans Google Analytics et signalée
+par un bandeau. La procédure complète (préprod, liste de contrôle,
+bascule, retour arrière) est dans **[DEPLOIEMENT.md](DEPLOIEMENT.md)**.
+
+En résumé : déposez les fichiers dans un dossier `/preprod/`, créez-y un
+fichier vide nommé `preprod.flag`, et pointez `config/db.php` vers une
+base de test. Le fichier `preprod.flag` n'est jamais versionné, il ne peut
+donc pas partir en production par accident.
+
 ## 1. Déploiement sur l'hébergement OVH
 
 1. **Créer la base de données** dans le Manager OVH (Hébergements >

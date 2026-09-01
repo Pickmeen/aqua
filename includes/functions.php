@@ -163,3 +163,22 @@ function countdown_label(string $sql_date): string
 
     return 'dans ' . $days . ' jours';
 }
+
+/**
+ * Vrai si cette copie du site est une préproduction.
+ *
+ * Repérée par la présence d'un fichier vide `preprod.flag` à la racine.
+ * Ce fichier n'est jamais versionné (.gitignore) : impossible de l'envoyer
+ * en production par mégarde. Sur une préprod, le site se marque noindex,
+ * n'envoie rien à Google Analytics et affiche un bandeau d'avertissement.
+ */
+function is_preprod(): bool
+{
+    static $flag = null;
+
+    if ($flag === null) {
+        $flag = file_exists(dirname(__DIR__) . '/preprod.flag');
+    }
+
+    return $flag;
+}

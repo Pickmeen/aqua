@@ -30,6 +30,9 @@ $nav_items = [
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title><?= e($page_title) ?></title>
 <meta name="description" content="<?= e($page_description) ?>">
+<?php if (is_preprod()): ?>
+<meta name="robots" content="noindex, nofollow">
+<?php endif; ?>
 <meta name="theme-color" content="#f4f8fa" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#061620" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="<?= e($site_base_url . $canonical_path) ?>">
@@ -96,7 +99,8 @@ $nav_items = [
 })();
 </script>
 
-<!-- Google tag (gtag.js) -->
+<?php if (!is_preprod()): ?>
+<!-- Google tag (gtag.js) — jamais chargé en préproduction -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-YSK54J1WP0"></script>
 <script>
 window.dataLayer = window.dataLayer || [];
@@ -104,9 +108,17 @@ function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
 gtag('config', 'G-YSK54J1WP0');
 </script>
+<?php endif; ?>
 </head>
 <body>
 <a class="skip-link" href="#main">Aller au contenu</a>
+
+<?php if (is_preprod()): ?>
+<p class="env-banner" role="status">
+    <b>Préproduction</b> — version de test, non indexée par Google.
+    Le vrai site reste <a href="<?= e($site_base_url) ?>">plongeecarpentras.fr</a>.
+</p>
+<?php endif; ?>
 
 <header class="site-header" id="site-header">
     <nav class="navbar" aria-label="Navigation principale">

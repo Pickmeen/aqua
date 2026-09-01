@@ -1,7 +1,7 @@
 Options -Indexes
 AddDefaultCharset UTF-8
 
-<FilesMatch "\.(sql|md|log|env)$">
+<FilesMatch "\.(sql|md|log|env|flag)$">
     Require all denied
 </FilesMatch>
 
